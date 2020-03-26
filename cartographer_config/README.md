@@ -1,0 +1,1 @@
+In the launch files f110_2d.launch and f110_2d_viz.launch, please change the paths arguments in the cartographer_node and rviz to match your specific path on your system. (Specifically, you'll need to match your home directory, and the workspace directory).
