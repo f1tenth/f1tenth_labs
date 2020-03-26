@@ -1,0 +1,148 @@
+\documentclass[letta4 paper]{article}
+% Set target color model to RGB
+\usepackage[inner=2.0cm,outer=2.0cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage[rgb]{xcolor}
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{amsgen,amsmath,amstext,amsbsy,amsopn,tikz,amssymb,tkz-linknodes}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true, urlcolor=blue,  linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{listings}
+\lstset{
+%	language=bash,
+	basicstyle=\ttfamily
+}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+\graphicspath{ {./img/} }
+
+\newcommand{\homework}[6]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf F1TENTH Autonomous Racing \hfill {\small (#2)}} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\Large \hfill #1  \hfill} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\it Instructor: {\rm #3} \hfill Name: {\rm #5}, StudentID: {\rm #6}} }
+       %\hbox to 6.28in { {\it T\textbf{A:} #4  \hfill #6}}
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{#5 -- #1}{#5 -- #1}
+   \vspace*{4mm}
+}
+
+
+\newcommand{\problem}[3]{~\\\fbox{\textbf{Problem #1: #2}}\hfill (#3 points)\newline}
+\newcommand{\subproblem}[1]{~\newline\textbf{(#1)}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Hy}{\mathcal{H}}
+\newcommand{\VS}{\textrm{VS}}
+\newcommand{\solution}{~\newline\textbf{\textit{(Solution)}} }
+
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\usepackage{booktabs}
+
+
+
+\begin{document}
+
+	\homework {Lab 4: Follow the Gap}{Due Date:}{INSTRUCTOR}{}{STUDENT NAME}{ID}
+	\thispagestyle{empty}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	\begin{table}[h]
+		\begin{tabular}{l p{14cm}}
+		\raisebox{-2cm}{\includegraphics[scale=0.5, height=2.5cm]{f1_stickers_03} } & \textit{This lab and all related course material on \href{http://f1tenth.org/}{F1TENTH Autonomous Racing} has been developed by the Safe Autonomous Systems Lab at the University of Pennsylvania (Dr. Rahul Mangharam). It is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.} You may download, use, and modify the material, but must give attribution appropriately. Best practices can be found \href{https://wiki.creativecommons.org/wiki/best_practices_for_attribution}{here}.}
+		\end{tabular}
+	\end{table}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	
+	\noindent \large{\textbf{Course Policy:}} Read all the instructions below carefully before you start working on the assignment, and before you make a submission. All sources of material must be cited. The University Academic Code of Conduct will be strictly enforced.
+	
+	\section{Learning outcomes}
+
+	The following fundamentals should be understood by the students upon completion of this lab:
+		
+	\begin{itemize}
+		\item Reactive methods for obstacle avoidance
+	\end{itemize}
+	
+	\section{Overview}
+	In this lab, you will implement a reactive algorithm for obstacle avoidance. While the base starter code defines an implementation of the F1TENTH Follow the Gap Algorithm, you are allowed to submit in C++, and encouraged to try different reactive algorithms or a combination of several. In total, the python code for the algorithm is only about 120 lines. 
+	
+	\section{Review of F1TENTH Follow the Gap}
+	The lecture slides on F1TENTH Follow the gap is the best visual resource for understanding every step of the algorithm. However, the steps are outlined over here:
+	\begin{enumerate}
+		\item Obtain laser scans and preprocess them 
+		\item Find the closest point in the LiDAR ranges array
+		\item Draw a safety bubble around this closest point and set all points inside this bubble to 0. All other non-zero points are now considered ``gaps" or ``free space"
+		\item Find the max length ``gap", in other words, the largest number of consecutive non-zero elements in your ranges array
+		\item Find the best goal point in this gap. Naively, this could be the furthest point away in your gap, but you can probably go faster if you follow the ``Better Idea" method as described in lecture. 
+		\item Actuate the car to move towards this goal point by publishing an \texttt{AckermannDriveStamped} to the \texttt{/nav} topic
+	\end{enumerate}
+	
+	
+	\section{Implementation}
+	Implement a reactive algorithm to make the car drive autonomously around the Levine Hall map. You are free to implement any reactive algorithm  you want, but the skeleton code is for the F1TENTH follow the gap algorithm in lecture. You can implement this node in either C++ or Python but the skeleton code is only in Python. You can download it from \href{https://github.com/f1tenth/f110_ros}{https://github.com/f1tenth/f110\_ros}. You will only have to edit \texttt{reactive\_gap\_follow.py}. There is also a test map (\texttt{levine\_blocked.pgm}) for you to evaluate on.
+	
+
+	\section{Deliverables and Submission}
+	% Make sure to place "labx" below with the correct lab number
+	Submit the following as \texttt{studentname\_lab4.zip} (replace studentname with your name):
+	
+
+	\begin{enumerate}
+		\item Your package named \texttt{studentname\_reactive.zip} including the \texttt{reactive\_gap\_follow.py} node. \textbf{Make sure it compiles before you submit after changing the package name.}
+		\item Make a youtube video of your reactive method around the Levine Loop in the simulator. Add this link to a text file named \texttt{studentname\_lab4\_video.txt}
+		\item Make a youtube video of it making its way around the custom map we will provide to you. Add this link to the same text file named \texttt{studentname\_lab4\_video.txt}
+	\end{enumerate}
+
+	\section{Grading}
+	
+	We will test your code by accelerating the car down a straight towards a wall in the Levine map, and your safety node should stop the car before collision.
+	
+	\subsection{Rubric}
+	\begin{table}[h]
+		\begin{tabular}{ll}
+			\textbf{Topics} & \textbf{Points} \\
+			Compilation & 10 \\
+			Implemented Find-Max Gap & 40 \\
+			Implemented Find best point & 30 \\
+			Levine Video & 10 \\
+			Custom Map Video & 10 \\
+			\textbf{Total} & 100 \\
+		\end{tabular}
+	\end{table}
+	
+
+	\section{Extra Resources}
+	UNC Follow the Gap Video: \url{https://youtu.be/ctTJHueaTcY}
+			
+\end{document} 

@@ -1,0 +1,11 @@
+# Topics that RRT listens to
+# TODO: add your own
+# TODO: change this to the pose topic published particle filter
+pose_topic: "some_pose_topic"
+scan_topic: "some_scan_topic"
+
+# Topics that RRT publishes to
+# TODO: add your own
+# visualization
+
+# TODO: add Parameters for RRT

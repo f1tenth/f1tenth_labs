@@ -1,0 +1,17 @@
+\BOOKMARK [1][-]{section.1}{Learning outcomes}{}% 1
+\BOOKMARK [1][-]{section.2}{Overview}{}% 2
+\BOOKMARK [1][-]{section.3}{Workspaces and Packages}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Written Questions}{section.3}% 4
+\BOOKMARK [1][-]{section.4}{Publishers and Subscribers}{}% 5
+\BOOKMARK [2][-]{subsection.4.1}{Subscribing to Data Using a Simple Lidar Processing Node}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.2}{Publishing to a New Topic Using a Simple Lidar Node}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.3}{Written Questions}{section.4}% 8
+\BOOKMARK [1][-]{section.5}{ Implementing Custom Messages}{}% 9
+\BOOKMARK [2][-]{subsection.5.1}{Written Questions}{section.5}% 10
+\BOOKMARK [1][-]{section.6}{Recording and Publishing Bag Files}{}% 11
+\BOOKMARK [2][-]{subsection.6.1}{Written Questions}{section.6}% 12
+\BOOKMARK [1][-]{section.7}{Using Launch Files to Launch Multiple Nodes}{}% 13
+\BOOKMARK [1][-]{section.8}{Good Programming Practices}{}% 14
+\BOOKMARK [1][-]{section.9}{Deliverables and Submission}{}% 15
+\BOOKMARK [1][-]{section.10}{Grading}{}% 16
+\BOOKMARK [2][-]{subsection.10.1}{Rubric}{section.10}% 17

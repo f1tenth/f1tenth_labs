@@ -1,0 +1,233 @@
+\documentclass[letta4 paper]{article}
+% Set target color model to RGB
+\usepackage[inner=2.0cm,outer=2.0cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage[rgb]{xcolor}
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{amsgen,amsmath,amstext,amsbsy,amsopn,tikz,amssymb,tkz-linknodes}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true, urlcolor=blue,  linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\lstset{
+%	language=bash,
+	basicstyle=\ttfamily
+}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+\graphicspath{ {./img/} }
+
+\newcommand{\homework}[6]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf F1TENTH Autonomous Racing \hfill {\small (#2)}} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\Large \hfill #1  \hfill} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\it Instructor: {\rm #3} \hfill Name: {\rm #5}, StudentID: {\rm #6}} }
+       %\hbox to 6.28in { {\it T\textbf{A:} #4  \hfill #6}}
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{#5 -- #1}{#5 -- #1}
+   \vspace*{4mm}
+}
+
+
+\newcommand{\problem}[3]{~\\\fbox{\textbf{Problem #1: #2}}\hfill (#3 points)\newline}
+\newcommand{\subproblem}[1]{~\newline\textbf{(#1)}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Hy}{\mathcal{H}}
+\newcommand{\VS}{\textrm{VS}}
+\newcommand{\solution}{~\newline\textbf{\textit{(Solution)}} }
+
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\usepackage{booktabs}
+
+
+
+\begin{document}
+
+	\homework {Lab 7: Motion Planning}{Due Date:}{INSTRUCTOR}{}{STUDENT NAME}{ID}
+	\thispagestyle{empty}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	\begin{table}[h]
+		\begin{tabular}{l p{14cm}}
+		\raisebox{-2cm}{\includegraphics[scale=0.5, height=2.5cm]{f1_stickers_04} } & \textit{This lab and all related course material on \href{http://f1tenth.org/}{F1TENTH Autonomous Racing} has been developed by the Safe Autonomous Systems Lab at the University of Pennsylvania (Dr. Rahul Mangharam). It is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.} You may download, use, and modify the material, but must give attribution appropriately. Best practices can be found \href{https://wiki.creativecommons.org/wiki/best_practices_for_attribution}{here}.}
+		\end{tabular}
+	\end{table}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	
+	\noindent \large{\textbf{Course Policy:}} Read all the instructions below carefully before you start working on the assignment, and before you make a submission. All sources of material must be cited. The University Academic Code of Conduct will be strictly enforced.
+	\\
+	\\
+	\textbf{THIS IS A GROUP ASSIGNMENT}. Submit one from each team.\\
+	
+	\section{Learning outcomes}
+
+	The following fundamentals should be understood by the students upon completion of this lab:
+		
+	\begin{itemize}
+		\item Motion Planning basic concepts.
+		\begin{itemize}
+			\item Configuration space vs. Workspace: you should understand the difference between configuration space and workspace, and the advantages and disadvantages of planning in each of them.
+			\item Free space vs. Obstacle space: you should understand the difference between free space and obstacle space.
+			\item Occupancy grids and Costmaps: you should understand what occupancy grids and costmaps are, how to use them, and how to create them.
+		\end{itemize}
+		
+		\item Motion Planning algorithms. You should understand the basic ideas of these following planning algorithms, their advantages and disadvantages, and when to use them.
+		\begin{itemize}
+			\item Grid-based search: Dijkstra's, A*, and their variants
+			\item Sampling based algorithms: RRT and its variants
+		\end{itemize}
+		
+	\end{itemize}
+	
+	\section{Overview}
+	The goal of this lab is to provide you with tools that will help you in a head-to-head race on a race track. After finishing this lab, your car should be able to do something like
+\href{https://www.youtube.com/watch?v=llHCRqwIllM}{this}.\\
+	
+	Before you start this lab, you should read the paper: \href{https://arxiv.org/pdf/1105.1186.pdf}{https://arxiv.org/pdf/1105.1186.pdf}. Pay close attention to sections \textbf{3.1, 3.2, Algorithm 3, 3.3, Algorithm 6}
+	\subsection{RRT Pseudocode}
+	\begin{algorithm}
+		\caption{RRT}
+		\begin{algorithmic}[1]
+			\STATE $V \leftarrow \{x_{init}\}$; $E\leftarrow \emptyset$;
+			\FOR{$i=1,\ldots,n$}
+			\STATE $x_{rand}\leftarrow \texttt{SampleFree}_i$;
+			\STATE $x_{nearest}\leftarrow \texttt{Nearest}(G=(V,E),x_{rand})$;
+			\STATE $x_{new}\leftarrow\texttt{Steer}(x_{nearest},x_{rand})$;
+			\IF{$\texttt{ObstacleFree}(x_{nearest},x_{new})$}
+			\STATE $V\leftarrow V\cup \{x_{new}\}$; $E\leftarrow E\cup \{(x_{nearest}, x_{new})\}$;
+			\ENDIF
+			\ENDFOR
+			\RETURN $G=(V,E)$;
+		\end{algorithmic}
+	\end{algorithm}
+	
+	The pseudocode of the basic version of RRT is listed as above. You can find all the details of the functions used by RRT in the paper. If you're implementing RRT*, or another version of RRT, read the RRT* section of the provided paper, and do some research to figure out how to modify the basic version of RRT.
+	\subsection{F1TENTH RRT vs. Generic RRT}
+	In general, RRT is often used as a global planner where the tree is kept throughout the time steps. Whenever there is a new obstacle, and the occupancy grid changes, the tree will change accordingly. In our case, RRT is used as a local planner for obstacle avoidance. This is due to the fact that we don't have a well-defined starting point and goal point when we're racing on a track and we want to run continuous laps. In our implementation, we are only keeping a tree for the current time step in an area around the car. You could try to keep one tree that populates the map throughout the time steps, but speed is going to be an issue if you don't optimize how you're finding nodes, and traversing the tree.\\
+	
+	
+	\newpage
+	\section{Part A: Written assignment}
+	Use the file \texttt{lab7\_solutions\_template.tex} in the \textit{latex} folder to type up your answers.
+	\begin{figure}[!hb]
+		\begin{center}
+			\includegraphics[scale=0.4]{grid_world.png}
+		\end{center}
+		\caption{Grid World}
+		\label{fig:gridworld}
+	\end{figure}
+	\subsection{Grid world planning with Dijkstra's}
+	Using figure \ref{fig:gridworld}, write out steps for Dijkstra's algorithm (\textbf{8-connected}, assume uniform cost for each action). At each step, list the grid cells in the open set with their running cost and the grid cells in the visited set. Write the final path found as a list of grid cell ids.
+	\subsection{Grid world planning with A*}
+	Using figure \ref{fig:gridworld}, write out steps for A* (\textbf{8-connected}, assume uniform cost for each action). At each step, list the grid cells in the open set with their f-value (use Manhattan distance to the goal as the heuristic function) and the grid cells in the visited set. Write the final path found as a list of grid cell ids.\\
+	
+	\newpage
+	\section{Part B: Coding assignment}
+	% The skeleton of the code could be found at: \href{https://github.com/mlab-upenn/f110_rrt_skeleton}{https://github.com/mlab-upenn/f110\_rrt\_skeleton}\\
+	You can choose to implement RRT in either the workspace or configuration space. Since we're working with a car-like robot, the workspace will be the car's position in the world, and the configuration space will be whatever you decided to add on top of that (heading angle, velocity, etc.).\\
+	Although we have provided skeleton code in both C++ and Python, we encourage you to implement this in C++ for higher performance. Although you could vectorize your code with numpy and use libraries like numba to speed up your Python code, we haven't implemented this lab in Python and can't guarantee any good performance. For reference, the code in the video is running at around 30 Hz on the car.
+	
+	\subsection{Where everything is}
+	The C++ skeleton source code \texttt{rrt.cpp} is in the \texttt{src} directory, and the header file \texttt{rrt.h} is in the \texttt{include} directory. The skeleton code for python is in the \texttt{scripts} directory.
+	\subsection{Implementing an Occupancy Grid}
+	\begin{figure}[!hb]
+		\begin{center}
+			\includegraphics[scale=0.35]{grid_map_annotated.png}
+		\end{center}
+		\caption{Example of a Multi-layer Occupancy Grid}
+		\label{fig:occgrid}
+	\end{figure}
+	You'll need to implement an occupancy grid for collision checking. Think about what is available to you (the map, the Laserscan messages, etc.), and construct a occupancy grid using those information. You can choose to either implement a binary occupancy grid (a grid cell is either 0 for unoccupied, or 1 for occupied), or use a probabilistic occupancy grid (a grid cell has values between 0 and 1 for probability that it is occupied). You could choose to implement either an occupancy grid in the car's local frame, or in the map's global frame. Depending on the size of the map that you use, think about how to compute updates to the occupancy grid and storing/using the occupancy grid efficiently. Since we're using RRT as a local planner, as in it comes up with a new path at every time step, you need to run everything relatively fast.  You'll also want to visualize the occupancy grid to ensure its correctness. You don't have to implement a multi-layer one like the one shown in \ref{fig:occgrid}.
+	
+	\subsection{Working in the simulator and on the car}
+	By this point, you should be pretty comfortable using the simulator to test your code. Since last lab, we have modified the simulator to publish the ground truth pose of the car, this would be useful for testing your algorithm in the simulator. When you test on the car, make sure you start slow, and increase your speed gradually. You'll see the effectiveness of your algorithm at a higher speed.\\
+	
+	\subsection{Using the ROS parameter server}
+	An important feature of ROS to use when creating a larger project and testing without re-compiling is the parameter server. Here are some useful information: \href{http://wiki.ros.org/Parameter\%20Server}{http://wiki.ros.org/Parameter\%20Server}, \href{http://wiki.ros.org/rosparam}{http://wiki.ros.org/rosparam}. Make sure to check most of the links in the page, because there are more information specific to rospy and roscpp.\\
+	This project will have a lot of parameters to tune. If you keep all your parameters as magic numbers, or store them in your code, you'll lose track very quickly. And also, changing a parameter in C++ requires rebuilding the workspace every time, while parameter server lets you change the yaml file and run the same executable. We have provided a starter parameters yaml file (\texttt{rrt\_params.yaml})\\
+	
+	\subsection{Trajectory Execution}
+	After you've found a path to your goal with RRT, there are different algorithms that you could use to follow that trajectory. The most obvious solution is Pure Pursuit that you have done from the last lab. Picking the waypoint out of the path for pure pursuit will be the most important part if you decided to go down this route. You want a balance between having the car steering smoothly, and at the same time, reactive enough to avoid obstacles. Also, up-sampling the path for pure pursuit to pick out a waypoint is a good way to go.\\
+	
+	\subsection{Hints}
+	Think about how you could change the way that you're sampling the free space to speed up the process of finding a path to the goal. Also think about how the restrict the area in which you're sampling to make sure you don't have too big of a tree. Besides RRT*, there are other versions of RRT that takes into consideration of other variables (the dynamics of the car for example). After you're done with the basic version of RRT, you should do some research and implement a better version of RRT.\\
+	Make sure you visualize the tree you've expanded, and the path you've chosen as the trajectory.
+	
+	\section{Part C: Extra credit}
+	\subsection{RRT*}
+	You'll be rewarded extra credit (10\%) for implementing RRT*, or another modified version of RRT (if you do, make a good argument on why it deserves extra credit). On top of the basic version of RRT, RRT* uses a cost function, and rewiring the tree, to find a better path to the goal. When the tree has expanded infinite number of nodes, RRT*'s solution is close to optimal. Figure \ref{fig:rrt_rrt_star} shows the difference in the tree expanded and path found between RRT and RRT*. The skeleton code provided has sections for functions in RRT* as well.
+	\begin{figure}[!hb]
+		\begin{center}
+			\includegraphics[scale=0.35]{rrt.png}
+			\includegraphics[scale=0.35]{rrt_star.png}
+		\end{center}
+		\caption{RRT vs. RRT*}
+		\label{fig:rrt_rrt_star}
+	\end{figure}
+
+	\newpage
+	\section{Deliverables and Submission}
+	% Make sure to place "labx" below with the correct lab number
+		Submit the following as \texttt{groupnumber\_lab7.zip} (replace \texttt{number} with your groupnumber):
+	
+
+	\begin{enumerate}
+		\item Your solutions to two problems as a pdf file. Use \texttt{lab7\_solution\_template.tex} in the \textit{latex} folder to fill in your answers.	
+		\item Your RRT package by the name of by the name of \texttt{groupnumber\_lab7}. \textbf{Make sure it compiles before you submit after changing the package name.}
+			\begin{enumerate}
+				\item If you’re using any libraries, include a list of dependencies in a readme file, also include the instructions to install them.
+			\end{enumerate}
+			
+	\end{enumerate}
+
+	\section{Grading}
+	
+	\subsection{Rubric}
+	\begin{table}[h]
+		\begin{tabular}{ll}
+			\textbf{Topics} & \textbf{Points} \\
+			Compilation & 20 \\
+			Written answers & 10 \\
+			Performance on straight path & 30 \\
+			Performance on turn & 30 \\
+			Video & 10 \\
+			\textbf{Total} & 100 \\
+		\end{tabular}
+	\end{table}
+	
+
+	
+			
+\end{document} 
