@@ -1,0 +1,431 @@
+\documentclass[letta4 paper]{article}
+% Set target color model to RGB
+\usepackage[inner=2.0cm,outer=2.0cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage[rgb]{xcolor}
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{amsgen,amsmath,amstext,amsbsy,amsopn,tikz,amssymb,tkz-linknodes}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true, urlcolor=blue,  linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{listings}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsmath}
+\lstset{
+%	language=bash,
+	basicstyle=\ttfamily
+}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+\graphicspath{ {./img/} }
+
+\newcommand{\homework}[6]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf F1TENTH Autonomous Racing \hfill {\small (#2)}} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\Large \hfill #1  \hfill} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\it Instructor: {\rm #3} \hfill Name: {\rm #5}, StudentID: {\rm #6}} }
+       %\hbox to 6.28in { {\it T\textbf{A:} #4  \hfill #6}}
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{#5 -- #1}{#5 -- #1}
+   \vspace*{4mm}
+}
+
+
+\newcommand{\problem}[3]{~\\\fbox{\textbf{Problem #1: #2}}\hfill (#3 points)\newline}
+\newcommand{\subproblem}[1]{~\newline\textbf{(#1)}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Hy}{\mathcal{H}}
+\newcommand{\VS}{\textrm{VS}}
+\newcommand{\solution}{~\newline\textbf{\textit{(Solution)}} }
+
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\usepackage{booktabs}
+
+
+
+\begin{document}
+
+	\homework {Lab 5: Scan Matching}{Due Date:}{INSTRUCTOR}{}{STUDENT NAME}{ID}
+	\thispagestyle{empty}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	\begin{table}[h]
+		\begin{tabular}{l p{14cm}}
+		\raisebox{-2cm}{\includegraphics[scale=0.5, height=2.5cm]{f1_stickers_03} } & \textit{This lab and all related course material on \href{http://f1tenth.org/}{F1TENTH Autonomous Racing} has been developed by the Safe Autonomous Systems Lab at the University of Pennsylvania (Dr. Rahul Mangharam). It is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.} You may download, use, and modify the material, but must give attribution appropriately. Best practices can be found \href{https://wiki.creativecommons.org/wiki/best_practices_for_attribution}{here}.}
+		\end{tabular}
+	\end{table}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	
+	\noindent \large{\textbf{Course Policy:}} Read all the instructions below carefully before you start working on the assignment, and before you make a submission. All sources of material must be cited. The University Academic Code of Conduct will be strictly enforced.
+	\\
+	\\
+	\textbf{THIS IS A GROUP ASSIGNMENT}. Submit one from each team.\\
+	
+	\section{Learning outcomes}
+
+	The following fundamentals should be understood by the students upon completion of this lab:
+		
+	\begin{itemize}
+     \item Localization
+	\item Odometry Estimation
+	\item Convex optimization
+	\item C++ OOP 
+	\item Quadratic Programming
+	\end{itemize}
+	
+	\section{Overview}
+	This section of the class deals with the problem of localization in Robotics and provides an introduction to localization and why is it important in the autonomy stack. Through the lab, one of the most fundamental algorithms of localization, scan matching, is implemented. It uses the Iterative Closest Point algorithm which has been introduced in class. You can take reference from the\href{https://censi.science/pub/research/2008-icra-plicp.pdf}{ Andre Censi PLICP paper} which is referenced in the pinned piazza post. By the end of this lab you will have a certain level of knowledge and expertise in localization of a robot given a mapped environment and how it is important in path planning and trajectory tracking. 
+	
+	 \section{Theoretical Questions}
+	 \begin{enumerate}
+	 	\item $M_{i}=\left(\begin{array}{cccc}{1} & {0} & {p_{i 0}} & {-p_{i 1}} \\ {0} & {1} & {p_{i 1}} & {p_{i 0}}\end{array}\right)$
+ 		\begin{enumerate}
+ 		\item Show that $B_{i} :=M_{i}^{T} M_{i}$ is symmetric. 
+ 		\item Demonstrate that $B_{i}$ is positive semi-definite
+	 	\end{enumerate}{}
+ 		
+ 		\item The following is the optimization problem:
+ 		\[ 
+ 		x^{*}=\operatorname{argmin}_{x \in \mathbb{R}^{4}} \sum_{i=1}^{n}\left\|M_{i} x-\pi_{i}\right\|_{2}^{2} \quad \text { s.t. } \quad x_{3}^{2}+x_{4}^{2}=1
+ 		\] 
+ 		\begin{enumerate}
+		\item Find the matrices M, W and g which give you the formulation 
+		\[
+		 x^{*}=\operatorname{argmin}_{x \in \mathbb{R}^{4}} x^{T} M x+g^{T} x 
+		\quad \text { s.t. } x^{T} W x=1
+		\]
+		\item Show that M and W are positive semi definite.
+ 		\end{enumerate}{}
+	 	
+	 \end{enumerate}
+
+	\section{Skeleton Code Explanation}
+	 The provided skeleton consists of three main program files and their respective header files which are needed to run the \texttt{scan\_matching} package. You have to work on only two of these program files. \texttt{Correspond.cpp} and \texttt{transform.cpp}. You will not necessarily have to change anything anywhere unless explicitly required by your code. In which case, you should specify the change made in your \texttt{README}.
+	 
+	 \subsection{Folder Contents}
+	 \begin{enumerate}
+	 		\item \textbf{scan\_match.cpp}
+	 		Contains the main function and the driver code for running the scan matching algorith. the node built is through this function and is called scan\_matcher. You can run the node using the command: 
+	 		\begin{verbatim}
+	 		$ rosrun <package-name> scan_matcher
+	 		\end{verbatim}
+	 		
+	 		\item \textbf{correspond.cpp and correspond.h} 
+	 		Contains the function definitions(in the \texttt{correspond.h }header file), the various structs needed for calculations (in the \texttt{correspond.h} header file) and the implementation of the functions needed for performing fast correspondence search and naive correspondence search. 
+	 	
+	 		In \texttt{correspond.cpp} you have to fill in the function: \texttt{getCorrespondence()}
+	 		\begin{enumerate}
+		 		\item \textbf{Input:}
+		 		\begin{enumerate}
+		 			\item \texttt{old\_points}: vector of struct points containing the old points of the scan
+		 			\item \texttt{trans\_points}: vector of struct points containing the new points transformed in the previous scans frame
+		 			\item \texttt{jump\_Table}: jump table created from the helper function 
+		 			\item \texttt{c} : vector of struct correspondences as a references. Being a reference this will also be the output. 
+		 		\end{enumerate}
+	 		
+		 		\item \textbf{Output:}
+		 		\begin{enumerate}
+		 			\item \texttt{c}: vector of struct correspondences as a reference will be changed in place. 
+		 		\end{enumerate}{}
+		 		\item \textbf{Helper Functions:}
+		 		\begin{enumerate}
+		 			\item \texttt{computeJump}: computes the jump table based on the previous table and current scan points 
+		 		\end{enumerate}
+	 		\end{enumerate}
+		 		
+	 		\item \textbf{transform.cpp and transform.h}
+	 		Contains the function definitions, function implementations and structs needed to perform transformation of points and updating the transforms by closed form ICP optimization technique taught in class. \\
+	 		You have to fill in the function: \texttt{updateTransform()}
+	 		\begin{enumerate}
+		 		\item \textbf{Input: }
+		 		\begin{enumerate}
+		 			\item \texttt{corresponds}: vector of struct correspondence containing corresponding points
+		 			\item \texttt{curr\_trans}: contains the transform found by the previous optimization step. Being a reference, you will update this with the new transform. 
+		 		\end{enumerate}
+		 		
+		 		\item \textbf{Output}
+		 		\begin{enumerate}
+		 			\item \texttt{curr\_trans}: to be updated in place as the new transform using the previous transform. 
+		 		\end{enumerate}
+		 		
+		 		\item \textbf{Helper Functions}
+		 		\begin{enumerate}
+		 			\item \texttt{transformPoints()}: you can use this function apply any transform to the set of points. Input the required transform and the points to be transformed. 
+		 			\item \texttt{get\_cubic\_root}: use this function to find the cubic roots given the 4 input coefficients of a cubic polynomial. 
+		 			\item \texttt{greatest\_real\_root()}: use this function to find the greatest real root of a quartic polynomial using the 5 coefficients of the quartic polynomial as the input. 
+		 		\end{enumerate}
+		 	\end{enumerate}
+	 	
+	 		\item \textbf{\texttt{visualization.cpp} and \texttt{visualization.h}} \\
+	 		You will not necessarily have to make any changes to these files. If you correctly fill in the previous files you will be able to visualize the odometry computed through the ICP scan matching algorithm.
+
+	 	\item Comments:
+	 	\begin{itemize}
+	 		\item We understand that the performance of the scan matching will not be ideal, the report should reflect an analysis of the performance and explanation of the limitations.
+	 		\item The initial implementation uses the naive correspondence search. This can be compared to the performance after implementing the improved correspondence search.
+	 	\end{itemize}
+	 \end{enumerate}
+	
+	\subsection{Data Structures}
+	The skeleton uses a few data structures which are defined in the different program files. You are free to use the data structures provided or make new ones of your own. The functions however should be implemented as defined.
+	
+	\begin{enumerate}
+		\item \textbf{Point}\\
+		The struct the radial distance and angular distance of a point from the car frame. In this struct there are few functions implemented which can be used to derive other information from the points:
+		\begin{itemize}
+			\item \texttt{distToPoint(point P)}: find the distance to another point
+			\item \texttt{distToPoint2(point P)}: find the square of the distance to another point 
+			\item \texttt{adialGap(point P)}: find the radial gap to another point
+			\item \texttt{getx()}: get the x coordinate of the point
+			\item \texttt{gety()}: get the y coordinate of the point
+			\item \texttt{ wrapTheta()}: wrap theta around 2pi during rotation
+			\item \texttt{rotate(phi)}: rotate the point by angle phi
+			\item \texttt{translate(x,y)}: translate a point by distance x and y 
+			\item \texttt{getVector()}: get the vector (in x and y)
+		\end{itemize}
+		
+		\item \textbf{Correspondence}
+		This struct stores the correspondence values which you find through the fast search algorithm. It contains the transformed points: $P$, original points : $P_0$ , first best point: $P_{j1}$, second best point $P_{j2}$.
+		\begin{itemize}
+			\item \texttt{getNormal()}: get normal of the correspondence
+			\item \texttt{getPiGeo()}: get correspondence point as a geometry message •
+			\item \texttt{getPiVec()}: get correspondence point as a vector message
+		\end{itemize}
+	
+		\item \textbf{Transform}
+		The struct stores the transform which you calculate through optimization at every step. it contains the x translation, y translation and the theta rotation.
+		\begin{itemize}
+			\item a\texttt{pply(point P)}: apply the transform to a provided point
+			\item \texttt{getMatrix()}: get the transformation matrix from the found transform
+		\end{itemize}
+	\end{enumerate}
+
+	\section{Algorithm Implementation}
+	In order to implement the scan matching algorithm you have to solve the following optimization problem:
+	\begin{equation}
+	\min_x\mathbf{x^\intercal Mx}+\mathbf{g^\intercal x}
+	\end{equation}
+	\begin{equation}
+	\mathbf{ x}\underbrace{(\sum_i \mathbf{M_i^\intercal C_iM_i})}_{M}\mathbf{ x}
+	 + \underbrace{(\sum_i -\mathbf{2\pi_i^\intercal C_iM_i)}}_{g}\mathbf{ x}
+	 \quad \text{s.t. }  \mathbf{ x^\intercal Wx}=1
+	\end{equation}
+
+	
+	\noindent Follow the steps below to solve the optimization problem above.
+	\begin{enumerate}
+		\item First, we define the following variables:
+		\begin{enumerate}
+			\item The optimization variable which contains the position and orientation transforms to be optimized.
+			\[
+			\mathbf{ x}=[x_1, x_2, x_3, x_4]=[t_x, t_y,cos \theta, sin \theta]
+			\] 
+			
+			\item \textbf{W} is the weight matrix which is needed for applying the constraint $x_3^2 + x_4^2 = 1$
+			\[
+			\mathbf{W} = 
+			\begin{bmatrix}
+			\mathbf{0}_{2x2} & \mathbf{0}_{2x2} \\
+			\mathbf{0}_{2x2} & \mathbf{I}_{2x2} 
+			\end{bmatrix}
+			\]
+			
+			\item Matrix $\mathbf{M}_i$		
+			\[
+			\mathbf{M}_i = 
+			\begin{bmatrix}
+			1 & 0 & p_{i0} & -p_{i1}\\
+			0 & 1 & p_{i1} & p_{i0}
+			\end{bmatrix}
+			\]
+			
+			\item Points $\mathbf{p}_i$ in the scans
+			\[
+			\mathbf{p}_i = (p_{i0}, p_{i1})
+			\]
+			
+			\item Matrix $\mathbf{C}_i$	
+			\[
+			\mathbf{C}_i = w_i\mathbf{n}_i \mathbf{n}_i^\intercal 
+			\]
+			where $\mathbf{n}_i \in \mathbb{R}^2$ is the vector normal to the line.
+		\end{enumerate}
+	
+	\item Now, we solve the optimization problem as follows:
+	
+	\begin{enumerate}
+		\item Using Lagrange multipliers so the solution to this problem can be found and the solution takes the following form:
+		\begin{equation}
+		\mathbf{x} = -(2\mathbf{M} + 2 \lambda \mathbf{W}^{-T})\mathbf{g}
+		\label{eq:lagrange}
+		\end{equation}
+		where $\mathbf{W}$ is defined in the previous step and $\mathbf{M}$ and $\mathbf{g}$ are known to us. We just need to find $\lambda$ to solve this equation.
+		
+		\item We can find $\lambda$ using some algebra tricks.
+		\begin{enumerate}
+			\item Write the expression of the previous equation in the form:
+			\begin{equation}
+			 2\mathbf{M} + 2 \lambda \mathbf{W} = 
+			\begin{bmatrix}
+				\mathbf{A} & \mathbf{B} \\
+				\mathbf{B}^\intercal  & \mathbf{D} + 2 \lambda \mathbf{I} 
+			\end{bmatrix} 
+			\end{equation}
+			and then find the values for $\mathbf{A}$, $\mathbf{B}$, and $\mathbf{D}$.
+			
+			\item Then, calculate $\mathbf{S}$ in the following expression:
+			\begin{equation}
+			 (\mathbf{D} - \mathbf{B}^\intercal \mathbf{A}^{-1} \mathbf{B} + 2 \lambda \mathbf{I}) \triangleq
+			 (\mathbf{S} + 2 \lambda \mathbf{I})
+			\end{equation}
+			
+			\item Calculate $S_A$
+			\begin{equation}
+			S^A = \textrm{det}(\mathbf{S})  \cdot \mathbf{S}^{-1}
+			\end{equation}
+			
+			\item Calculate $p(\lambda)$:
+			\item Calculate $S_A$
+			\begin{equation}
+			p(\lambda) = \textrm{det}(\mathbf{S}+ 2 \lambda \mathbf{I})
+			\end{equation}
+		
+			\item Use the parameters found about to solve the following quartic equation to find $\lambda$. $p$ is a function of $\lambda$ To use helper functions which have been provided in the code, you only need to find the coefficients of quartic equation that follows:
+			\begin{equation}
+			\begin{aligned}
+			\textrm{[}p(\lambda)^2\textrm{]} = 
+			& 4 \lambda^2 \mathbf{g}^\intercal
+			\begin{bmatrix}
+			\mathbf{A}^{-1} \mathbf{B} \mathbf{B}^\intercal \mathbf{A}^{-\intercal} & -\mathbf{A}^{-1} \mathbf{B} \\
+			\textrm{(symm)} & \mathbf{I} 
+			\end{bmatrix} \mathbf{g}\\
+			& + 4 \mathbf{g}^\intercal
+			\begin{bmatrix}
+			\mathbf{A}^{-1}\mathbf{B} \mathbf{S}^\mathbf{A} \mathbf{B}^\intercal \mathbf{A}^{-\intercal} & -\mathbf{A}^{-1} \mathbf{B} \mathbf{S}^\mathbf{A} \\
+			\textrm{(symm)} & \mathbf{S}^\mathbf{A} 
+			\end{bmatrix} \mathbf{g}\\
+			& +
+			\mathbf{g}^\intercal
+			\begin{bmatrix}
+			\mathbf{A}^{-1}\mathbf{B} \mathbf{S}^{\mathbf{A}^\intercal} \mathbf{S}^\mathbf{A} \mathbf{B}^\intercal \mathbf{A}^{-\intercal} & -\mathbf{A}^{-1} \mathbf{B} \mathbf{S}^{\mathbf{A}^\intercal} \mathbf{S}^\mathbf{A} \\
+			\textrm{(symm)} & \mathbf{S}^{\mathbf{A}^\intercal} \mathbf{S}^\mathbf{A}
+			\end{bmatrix} \mathbf{g}
+			\end{aligned}
+			\end{equation}
+			
+			\item Now that you have $\lambda$, plug $\lambda$ back into Equation \eqref{eq:lagrange} to solve for $\mathbf{x}$.
+			
+			\item Repeat until convergence. This can be a fixed number of iterations or until the difference in the metric between iterations is below some threshold.
+			
+			
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+	\end{enumerate}
+	
+	\section{Fast Correspondence Search}
+	The pseudo code given in the censi paper \href{https://d1b10bmlvqabco.cloudfront.net/attach/jzp1ehpfdij7ot/jle03wepvgi3j6/k0snhjhdvfrs/2008icraplicp1.pdf}{Andre Censi PlICP} in the appendix is the best resource to get started on the fast correspondence search algorithm. It is intuitive and the slides proivde sufficient understandings for the concepts.\\
+	Here are a few pointers to take care of while coding the algorithm.
+	\begin{itemize}
+		\item Jump table is computed for one scan set and not for each scan point. The scan table implementation is already present in the skeletion.
+		\item Start the correspondence search from the previous best point correspondence you found for each point.
+		\item It is safe to make the assumption that the second best point is adjacent to the best point you have found. Decreasing or increasing the index ( while taking care of the edge cases) should work. You are free to implement better ways.
+		\item Make use of early stopping criterion cleverly. It helps in making the search faster.
+		\item For finding the distances between the points, the functions implemented in the Point struct will be useful. Be careful, the point to line metric is not the metric for finding the closest point. It is only the metric for optimization. For correspondence you only search for the closest point by euclidean distance.
+	\end{itemize}
+	
+	\section{Running the Package}
+	To run the package use the following commands:
+	\begin{enumerate}
+		\item Run the simulator:
+		\begin{verbatim}
+		roslaunch racecar_simulator simulator.launch    
+		\end{verbatim}
+		\item Run the scan matching package: 
+		\begin{verbatim}
+		rosrun <name_of_package> scan_matcher 
+		\end{verbatim}
+		\item In Rviz, add the pose estimate which is published by the name of \texttt{scan\_match\_location} 
+		\item Use \texttt{plotjuggler} to see the results 
+		\begin{verbatim}
+		rosrun plotjuggler PlotJuggler
+		\end{verbatim}
+		You will have to use the stream topics option on the top left bar. 
+	\end{enumerate}
+
+	\section{Deliverables and Submission}
+	% Make sure to place "labx" below with the correct lab number
+	Submit the following as \texttt{studentname\_lab5.zip} (replace studentname with your name):
+	
+	\begin{enumerate}
+		\item Lab writeup as a pdf. Use \texttt{lab5\_solution\_template.tex} in the \textit{latex} folder. The write up should include the following:
+		\begin{enumerate}
+			\item Answers to the theoretical questions. 
+			\item Writeup describing your approach and the roadblocks you encountered in the development.
+			\item Plots of measurements of performance and analysis of results
+		\end{enumerate}
+		\item A short youtube video of the simulation demonstrating the odometry estimation. Include the link in a text file named \texttt{studentname\_lab5\_video.txt}.
+		\item  A ROS Package by the name of \texttt{studentname\_lab5}. \textbf{Make sure it compiles before you submit after changing the package name.} It should contain the following files:
+		\begin{enumerate}
+			\item All the existing files of the skeleton with all the functions specified in this handout filled in.
+			\item Any other helper function files that you use.
+			\item A \texttt{README} with any other dependencies your submission requires.
+		\end{enumerate}
+
+	\end{enumerate}
+	
+
+	\section{Grading}
+	You will be evaluated on the implementation of the scan matching algorithm and the analysis of the performance. We will evaluate how much the odometry estimates published by the scan matching algorithm deviate from the true odometry published by the vesc in the simulator. You can check this on your own by using the ROS tool called \href{http://wiki.ros.org/plotjuggler}{plotjuggler}. An important part of your task will be to measure and analyze the performance of your implementation. You can measure and plots results such as metric score versus iteration, mean-squared-error in odometry versus iterations until solution, etc. A thorough analysis of the different factors that affect performance and explanation for limitations is highly recommended.
+	\newpage
+	\subsection{Rubric}
+	\begin{table}[h]
+		\begin{tabular}{ll}
+			\textbf{Topics} & \textbf{Points} \\
+			Compilation & 	10 \\
+			Map Submission (optional) & 	0 \\
+			.csv waypoints & 	10 \\
+			Race day performance (completed baseline) & 	20 \\
+			Correctly calculated steering angle from y offset & 	20 \\
+			Using correct frame to calculate the steering angle & 	20 \\
+			Visualization & 	10 \\
+			Correctly choose waypoint & 	10 \\
+			\textbf{Total} & 100 \\
+		\end{tabular}
+	\end{table}
+	
+
+	
+			
+\end{document} 

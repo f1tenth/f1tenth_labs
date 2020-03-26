@@ -1,0 +1,323 @@
+\documentclass[letta4 paper]{article}
+% Set target color model to RGB
+\usepackage[inner=2.0cm,outer=2.0cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage[rgb]{xcolor}
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{amsgen,amsmath,amstext,amsbsy,amsopn,tikz,amssymb,tkz-linknodes}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true, urlcolor=blue,  linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\lstset{
+%	language=bash,
+	basicstyle=\ttfamily
+}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+\graphicspath{ {./img/} }
+
+\newcommand{\homework}[6]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf F1TENTH Autonomous Racing \hfill {\small (#2)}} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\Large \hfill #1  \hfill} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\it Instructor: {\rm #3} \hfill Name: {\rm #5}, StudentID: {\rm #6}} }
+       %\hbox to 6.28in { {\it T\textbf{A:} #4  \hfill #6}}
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{#5 -- #1}{#5 -- #1}
+   \vspace*{4mm}
+}
+
+
+\newcommand{\problem}[3]{~\\\fbox{\textbf{Problem #1: #2}}\hfill (#3 points)\newline}
+\newcommand{\subproblem}[1]{~\newline\textbf{(#1)}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Hy}{\mathcal{H}}
+\newcommand{\VS}{\textrm{VS}}
+\newcommand{\solution}{~\newline\textbf{\textit{(Solution)}} }
+
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\usepackage{booktabs}
+
+
+
+\begin{document}
+
+	\homework {Lab 1: Introduction to ROS}{Due Date:}{INSTRUCTOR}{}{STUDENT NAME}{ID}
+	\thispagestyle{empty}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	\begin{table}[h]
+		\begin{tabular}{l p{14cm}}
+		\raisebox{-2cm}{\includegraphics[scale=0.5, height=2.5cm]{f1_stickers_02} } & \textit{This lab and all related course material on \href{http://f1tenth.org/}{F1TENTH Autonomous Racing} has been developed by the Safe Autonomous Systems Lab at the University of Pennsylvania (Dr. Rahul Mangharam). It is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.} You may download, use, and modify the material, but must give attribution appropriately. Best practices can be found \href{https://wiki.creativecommons.org/wiki/best_practices_for_attribution}{here}.}
+		\end{tabular}
+	\end{table}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	
+	\noindent \large{\textbf{Course Policy:}} Read all the instructions below carefully before you start working on the assignment, and before you make a submission. All sources of material must be cited. The University Academic Code of Conduct will be strictly enforced.
+	
+	\section{Learning outcomes}
+
+	The following fundamentals should be understood by the students upon completion of this lab:
+		
+	\begin{itemize}
+	    \item Understanding the directory structure and framework of ROS
+		\item Understanding how publishers and subscribers are implemented
+		\item Implementing custom messages
+		\item Understanding Cmake lists and package.XML files
+		\item Understanding dependencies
+		\item Working with launch files
+		\item Working with Rviz
+		\item Working with Bag files
+	\end{itemize}
+	
+	\section{Overview}
+	The goal of this lab assignment is to get you familiar with the various paradigms and uses of ROS and how it can be used to build robust robotic systems.
+	ROS is a meta-operating system which simplifies inter-process communication between elements of a robot's perception planning and control systems.
+	
+	We would highly recommend that you are able to understand this tutorial in both Python and C++. The Autonomous/Robotics industry is heavily C++ oriented, especially outside of machine learning and data science applications. This class will be a good opportunity to get hands-on with C++ implementation in robotic systems. In any case, the lab may be submitted in C++ or Python. At least one lab in the course will require the use of C++; in general both options will be available. All written questions must be answered irrespective of the language you choose for your implementation. 
+	
+	The questions titled with \textbf{Python} are for python and \textbf{C++} is for C++.
+	If the question titles \textbf{Python \& C++} then the same question applies for both Python and C++.
+	
+	
+	\textbf{NOTE: There is a section of good programming practices while writing code at the very end of this lab. It would be good to go through that once before you start this lab and keep it mind while you implement the code of this lab and also in later labs.}
+
+
+	\section{Workspaces and Packages}
+	
+	Use the following two tutorials to setup a workspace and a test package in your vehicle. There are tutorials for both Python and C++. Choose one.\\
+	\href{http://wiki.ros.org/catkin/Tutorials/create_a_workspace}{ Create a Workspace}\\
+	\href{http://wiki.ros.org/ROS/Tutorials/CreatingPackage}{ Create a Package}
+	
+	\noindent Name your workspace as:
+	\begin{lstlisting}[language=bash]
+	<student_name_ws>
+	\end{lstlisting}
+	And the Package as : 
+	\begin{lstlisting}[language=bash]
+	<student_name_roslab>
+	\end{lstlisting}
+	
+	\subsection{Written Questions}
+	\begin{enumerate}
+		\item (\textbf{C++ \& Python}) What is a Cmakelist.txt ? Is it related to a make file used for compiling C++ objects? If yes then what is the difference between the two?
+		\item (\textbf{Python \& C++}) Are you using CMakelist.txt for python in ROS? Is there a executable object being created for python? 
+		\item (\textbf{Python \& C++}) Where would you run the catkin\_make?In which directory? 
+		\item The following command was used in the tutorial
+		\begin{lstlisting}
+		$ source /opt/ros/kinetic(melodic)/setup.bash
+		$ source devel/setup.bash
+		$ echo $ROS_PACKAGE_PATH
+		\end{lstlisting}{}
+		(\textbf{Python \& C++})What is the significance of sourcing the setup files? 
+		
+	\end{enumerate}{}
+
+	\section{Publishers and Subscribers}
+	We will now implement a publisher and a subscriber. Use the following references if you are new to ROS: \\
+	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28c%2B%2B%29}{Wrtiting publishers and subscribers in C++ ROS}\\
+	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29}{Wrtiting publishers and subscribers in python ROS}\\
+			
+	\subsection{Subscribing to Data Using a Simple Lidar Processing Node}
+	We will subscribe to the data published by the lidar in the simulated vehicle in the Sim that has been introduced. Run the following commands in different terminals. 
+	\begin{lstlisting}
+	$ roslaunch racecar_simulator simulator.launch
+	\end{lstlisting}{}
+	In a different terminal
+	\begin{lstlisting}
+	$ rostopic list
+	\end{lstlisting}{}
+	You will now see a complete list of topics being published by the Simulator, one of which will be /\texttt{scan}. Run the following commands:
+	\begin{lstlisting}
+	$ rostopic echo /scan
+	\end{lstlisting}{} 
+	This command prints out the data which is being published over the \texttt{scan} topic in the terminal. The scan topic contains the measurements made by the 2d lidar scanner around the vehicles. The data contains 1080 distance measurements at fixed angle increments. 
+
+	Your task is to create a new node which subscribes to the \texttt{/scan} topic.
+	
+	\begin{itemize}
+		\item You will have to take care of the data(message) type of the /scan topic. It should be included in your call back function. You can check this by the command. 
+		\begin{lstlisting}
+		$ rostopic info /scan
+		\end{lstlisting}{}
+		\item The message type should be :
+		\begin{lstlisting}
+		sensor_msg::LaserScan
+		\end{lstlisting}{}
+		You can also check the information of the message by using the following commands: \\
+		\begin{lstlisting}
+		$ rosmsg show sensor_msgs/LaserScan
+		\end{lstlisting}{}
+		Go through the \href{http://docs.ros.org/melodic/api/sensor_msgs/html/msg/LaserScan.html}{data type documentation} and see how you can work acquire the data( hint: you should be using \texttt{std::arrays} and/or \texttt{std::vectors} here and be taking care of inf values using \texttt{std::isinf} and \texttt{NaN} values using \texttt{std::isnan})\\
+		
+		\textbf{Suggestion}: If you are not familiar with using gdb ( c++ debugger) or pdb(python debugger) you can print out messages using:
+		\begin{lstlisting}
+		ROS_INFO_STREAM()
+		\end{lstlisting}{}
+		
+		\item Be sure to include the header file of the message file in your script. (more on what this header file is in a later section of this lab) 
+	\end{itemize}{}
+	
+	\subsection{Publishing to a New Topic Using a Simple Lidar Node}
+	
+	Now we will process the data we have received from the lidar and publish it over some topic. 
+	\\
+	Find out the maximum value in the lidar data ( the farthest point which is the range in meters) and the minimum value(the closest point which is the range in meters). Publish them over two separate topics,
+	\begin{lstlisting}
+	\closest_point
+	\farthest_point
+	\end{lstlisting}{}
+	Keep the data type (message typ) for both the topics as \texttt{Float64}. 
+	
+	\subsection{Written Questions}
+	\begin{enumerate}
+		\item (\textbf{C++})What is a nodehandle object? Can we have more than one nodehandle objects in a single node? 
+		\item (\textbf{Python}) Is there a nodehandle object in python? What is the significance of \texttt{rospy.init\_node()}
+		\item (\textbf{C++})What is \texttt{ros::spinOnce()}? How is it different from \texttt{ros::Spin()}?
+		\item (\textbf{C++})What is \texttt{ros::rate()}? 
+		\item (\textbf{Python}) How do you control callbacks in python for the subscribers? Do you need \texttt{spin()} or \texttt{spinonce()} in python?
+	\end{enumerate}{}
+			
+	\section{ Implementing Custom Messages}
+	Now we will implement a Custom message in the package you have developed above. The following tutorial explains how to implement and use Custom messages. \\
+	\href{http://wiki.ros.org/ROS/Tutorials/CreatingMsgAndSrv}{ Creating custom ROS message files}
+	(\textbf{Pay attention to the cmake list and the XML file. Also, make sure to include the header file of hte message file in your script,})\\
+	
+	You need to implement a custom message which includes both maximum and minimum values of the scan topic and publishes them over a topic: 
+	\begin{lstlisting}
+	Msg File name: scan_range.msg
+	Topic name : /scan_range
+	\end{lstlisting}{}
+	
+	\subsection{Written Questions}
+	\begin{enumerate}
+		\item (\textbf{C++})Why did you include the header file of the message file instead of the message file itself?
+		\item (\textbf{Python \& C++})In the documentation of the LaserScan message there was also a data type called Header header. What is that? Can you also include it in your message file? What information does it provide? Include Header in your message file too. 
+	\end{enumerate}{}
+
+	\section{Recording and Publishing Bag Files}
+	Here we will work with bagfiles. Follow this tutorial to record a a bag file using the given commands. \\
+	\href{http://wiki.ros.org/ROS/Tutorials/Recording%20and%20playing%20back%20data}{Robsag Tutorial}\\
+
+	\subsection{Written Questions}
+	\begin{enumerate}
+		\item (\textbf{Python \& C++})Where does the bag file get saved? How can you change where it is saved? 
+		\item (\textbf{Python \& C++})Where will the bag file be saved if you were launching the recording of bagfile record through a launch file. How can you change where it is saved?
+	\end{enumerate}{}
+
+
+	\section{Using Launch Files to Launch Multiple Nodes}
+	Implement a launch file which starts the node you have developed above along with Rviz. If you are not familiar with RViz or launch files, the Rviz tutorial of RosWiki will be helpful:  \\
+	\href{http://wiki.ros.org/rviz/Tutorials}{RViz Tutorial}\\
+	\href{http://wiki.ros.org/roslaunch}{Roslaunch Tutorial}\\
+	\noindent Name your launchfile \texttt{student\_name\_lab1.launch}
+	
+	Set the parameters of Rviz to display your lidar scan instead of manually doing it through the Rviz GUI. Change rviz configuration file. You will have to first change the configurations in the Rviz GUI, save them and then launch them using the launch file.
+	
+	Here are a couple of good answers on ROS wiki for saving and launching Rviz Configruation files: \\
+	\href{https://answers.ros.org/question/287670/run-rviz-with-configuration-file-from-launch-file/}{Launching Rviz Config file}\\
+	\href{https://answers.ros.org/question/11845/rviz-configuration-file-format/}{Saving Rviz config file}\\
+
+	\section{Good Programming Practices}
+	This class is heavily implementation oriented and it is our hope that this class will help you reach a better level of programming robotic systems which are robust and safety critical. 
+	\begin{enumerate}
+	\item \textbf{Python and C++}
+	\begin{itemize}
+		\item The skeletons will be in the format of class objects. Keep them as that. If you need to implement a new functionality which can be kept separate put it in a separate function definition inside the skeleton class or inside a different class whose object you can call in the skeleton class. 
+		\item Keep things private as much as you can. Global variables are strongly discouraged. Additionally, public class variables are also to be used only when absolutely necessary. Most of the labs you can keep everything private apart from initialization function.
+		\item Use debuggers. It will take a day to set up but will help you in the entire class. The debuggers are mentioned in the sections below.
+	\end{itemize}
+	\item \textbf{Python}
+	\begin{itemize}
+		\item ROS uses Python2 and not Python3. Make sure that your system-wide default python is python2 and not python3. 
+		\item Use PDB. Easy to use and amazing to work with. \href{https://realpython.com/python-debugging-pdb/}{PDB Tutorial}
+		\item Use spaces instead of tab. Spaces are universally the same in all machines and text editors. If you are used to using Tabs, then take care that you are consistent in the entire script. 
+		\item Vectorize your code. Numpy is extremely helpful and easy to use for vectorizing loops. Nested for loops will slow down your code, try to avoid them.
+		\item This is a good reference for Python-ROS coding style:
+		\href{http://wiki.ros.org/PyStyleGuide}{Python-ROS style guide}
+	\end{itemize}{}
+	\item \textbf{C++}
+	\begin{itemize}
+		\item Use GDB and/or Valgrind. You will have to define the dependencies in your cmake lists and some flags. GDB is good for segmentation faults and Valgrind is good for Memory leaks.
+		\href{http://wiki.ros.org/roslaunch/Tutorials/Roslaunch%20Nodes%20in%20Valgrind%20or%20GDB}{Debugging with ROS Tutorial}
+			\item C++ 11 has functionalities which are helpful in writing better code.You should be looking at things like uniform initialization, \textbf{auto} key word and iterating with \textbf{auto} in loops. 
+			\item Use maps and un-ordered maps whenever you need key value pair implementations. Use sets when you want to make sure that there are unique values in the series. Vectors are good too when you just want good old arrays. All the aforementioned containers are good for searching as they don't require going through the entire data to search. Linked lists will not be helpful too much in most cases. Exceptions maybe there.
+			\item This is a good reference for C++ - ROS coding style: \href{http://wiki.ros.org/CppStyleGuide}{C++ -ROS style guide}
+		\end{itemize}{}
+	\end{enumerate}{}
+
+
+
+	\section{Deliverables and Submission}
+	\textbf{Note: You are not supposed to use any separate packages or dependencies for this lab. }
+	% Make sure to place "labx" below with the correct lab number
+	Submit the following as \texttt{studentname\_lab1.zip} (replace studentname with your name):
+	
+
+	\begin{enumerate}
+    \item Pdf with written answers. Use the \texttt{lab1\_solutions\_template.tex} template in the latex folder.
+	\item A ROS Package by the name of \: \texttt{student\_name\_lab1 }
+	\item the ROS Package should have the following files
+	\begin{enumerate}
+		\item \texttt{lidar\_processing.cpp} OR \texttt{lidar\_processing.py}
+		\item \texttt{scan\_range.msg}
+		\item \texttt{student\_name\_roslab.launch}
+		\item Any other helper function files that you use.
+		\item A \texttt{README} with any other dependencies your submission requires (you should not need any). 
+	\end{enumerate}{}
+	\end{enumerate}
+
+	\section{Grading}
+	
+	\subsection{Rubric}
+	\begin{table}[h]
+		\begin{tabular}{ll}
+			\textbf{Topics} & \textbf{Points} \\
+			Compilation &	15 \\
+			Written answers &	15 \\
+			Bag file Pprovided &	5 \\
+			Publisher subscriber implemented &	20 \\
+			custom messages implemented &	20 \\
+			Launch file and rviz configuration &	20 \\
+			Programming practices &	5 \\
+			\textbf{Total} & 100 \\
+		\end{tabular}
+	\end{table}
+	
+
+	
+			
+\end{document} 
