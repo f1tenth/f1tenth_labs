@@ -95,98 +95,112 @@
 	\begin{itemize}
 	    \item Understanding the directory structure and framework of ROS
 		\item Understanding how publishers and subscribers are implemented
-		\item Implementing custom messages
-		\item Understanding Cmake lists and package.XML files
+		\item Understanding how custom messages are implemented
+		\item Understanding CMakeLists.txt and package.xml files
 		\item Understanding dependencies
 		\item Working with launch files
-		\item Working with Rviz
+		\item Working with RViz
 		\item Working with Bag files
 	\end{itemize}
 	
 	\section{Overview}
-	The goal of this lab assignment is to get you familiar with the various paradigms and uses of ROS and how it can be used to build robust robotic systems.
-	ROS is a meta-operating system which simplifies inter-process communication between elements of a robot's perception planning and control systems.
+	The goal of this lab assignment is to get you familiar with the various paradigms and uses of ROS and how it can be used to build robust robotic systems. ROS is a meta-operating system which simplifies inter-process communication between elements of a robot's various sub-systems.
 	
-	We would highly recommend that you are able to understand this tutorial in both Python and C++. The Autonomous/Robotics industry is heavily C++ oriented, especially outside of machine learning and data science applications. This class will be a good opportunity to get hands-on with C++ implementation in robotic systems. In any case, the lab may be submitted in C++ or Python. At least one lab in the course will require the use of C++; in general both options will be available. All written questions must be answered irrespective of the language you choose for your implementation. 
-	
-	The questions titled with \textbf{Python} are for python and \textbf{C++} is for C++.
-	If the question titles \textbf{Python \& C++} then the same question applies for both Python and C++.
-	
-	
-	\textbf{NOTE: There is a section of good programming practices while writing code at the very end of this lab. It would be good to go through that once before you start this lab and keep it mind while you implement the code of this lab and also in later labs.}
-
+	We highly recommend that you go through this tutorial in both Python and C++ to help yourself to learn all aspects of ROS. The written questions are titled with their corresponding languates. The questions titled with \textbf{Python} are for Python, \textbf{C++} are for C++, and \textbf{Python \& C++} for both Python and C++. If you choose to finish this lab in one language, answer the questions for that language and the questions for both languages.
 
 	\section{Workspaces and Packages}
 	
-	Use the following two tutorials to setup a workspace and a test package in your vehicle. There are tutorials for both Python and C++. Choose one.\\
-	\href{http://wiki.ros.org/catkin/Tutorials/create_a_workspace}{ Create a Workspace}\\
+	Use the following two tutorials to setup a workspace and a test package.
+	
+	\href{http://wiki.ros.org/catkin/Tutorials/create_a_workspace}{ Create a Workspace}
+	
 	\href{http://wiki.ros.org/ROS/Tutorials/CreatingPackage}{ Create a Package}
 	
 	\noindent Name your workspace as:
+	
 	\begin{lstlisting}[language=bash]
 	<student_name_ws>
 	\end{lstlisting}
-	And the Package as : 
+	
+	\noindent And the Package as:
+	
 	\begin{lstlisting}[language=bash]
 	<student_name_roslab>
 	\end{lstlisting}
 	
 	\subsection{Written Questions}
 	\begin{enumerate}
-		\item (\textbf{C++ \& Python}) What is a Cmakelist.txt ? Is it related to a make file used for compiling C++ objects? If yes then what is the difference between the two?
-		\item (\textbf{Python \& C++}) Are you using CMakelist.txt for python in ROS? Is there a executable object being created for python? 
-		\item (\textbf{Python \& C++}) Where would you run the catkin\_make?In which directory? 
-		\item The following command was used in the tutorial
-		\begin{lstlisting}
+		\item (\textbf{Python \& C++}) What is a CMakeList? Is it related to a make file used for compiling C++ objects? If yes then what is the difference between the two?
+		\item (\textbf{Python \& C++}) Are you using CMakeList.txt for Python in ROS? Is there a executable object being created for Python? 
+		\item (\textbf{Python \& C++}) In which directory would you run \texttt{catkin\_make}? 
+		\item (\textbf{Python \& C++}) The following commands were used in the tutorial
+		
+		\begin{lstlisting}[language=bash]
 		$ source /opt/ros/kinetic(melodic)/setup.bash
 		$ source devel/setup.bash
-		$ echo $ROS_PACKAGE_PATH
-		\end{lstlisting}{}
-		(\textbf{Python \& C++})What is the significance of sourcing the setup files? 
+		\end{lstlisting}
+
+		Why do we need to source \texttt{setup.bash}? What does it do? Why do we have to different \texttt{setup.bash} files here and what is there difference?
 		
-	\end{enumerate}{}
+	\end{enumerate}
 
 	\section{Publishers and Subscribers}
-	We will now implement a publisher and a subscriber. Use the following references if you are new to ROS: \\
-	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28c%2B%2B%29}{Wrtiting publishers and subscribers in C++ ROS}\\
-	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29}{Wrtiting publishers and subscribers in python ROS}\\
+	We will now implement a publisher and a subscriber. The corresponding tutorials are here:
+	
+	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber\%28c\%2B\%2B\%29}{Writing publishers and subscribers in C++ ROS}
+		
+	\href{http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber\%28python\%29}{Writing publishers and subscribers in Python ROS}
 			
-	\subsection{Subscribing to Data Using a Simple Lidar Processing Node}
-	We will subscribe to the data published by the lidar in the simulated vehicle in the Sim that has been introduced. Run the following commands in different terminals. 
+	\subsection{Subscribing to Data Using a Simple LIDAR Processing Node}
+	We will subscribe to the data published by the synthetic LIDAR in the simulator. Run the following commands in different terminals. First launch the simulator:
+	
 	\begin{lstlisting}
-	$ roslaunch racecar_simulator simulator.launch
+	$ roslaunch f110_simulator simulator.launch
 	\end{lstlisting}{}
-	In a different terminal
+	
+	In a different terminal, list all the topics active right now:
+	
 	\begin{lstlisting}
 	$ rostopic list
-	\end{lstlisting}{}
-	You will now see a complete list of topics being published by the Simulator, one of which will be /\texttt{scan}. Run the following commands:
+	\end{lstlisting}
+	
+	You will now see a complete list of topics being published by the simulator, one of which will be /\texttt{scan}. Run the following commands to take a look at what's being published on this topic:
+	
 	\begin{lstlisting}
 	$ rostopic echo /scan
-	\end{lstlisting}{} 
-	This command prints out the data which is being published over the \texttt{scan} topic in the terminal. The scan topic contains the measurements made by the 2d lidar scanner around the vehicles. The data contains 1080 distance measurements at fixed angle increments. 
+	\end{lstlisting}
+	
+	This command prints out the data which is being published over the /\texttt{scan} topic in the terminal. The /\texttt{scan} topic contains the measurements made by the 2D LIDAR scanner. The data contains distance measurements at fixed angle increments.
 
 	Your task is to create a new node which subscribes to the \texttt{/scan} topic.
 	
 	\begin{itemize}
-		\item You will have to take care of the data(message) type of the /scan topic. It should be included in your call back function. You can check this by the command. 
+		\item In ROS, all data communicated on topics have to conform to a certain pre-defined message type. For the subscriber you're implementing that listens to the /\texttt{scan} topic, you'll need to designate the message type in your callback function. If you're not sure, you can check the message type of the messages being communicated on a topic (/\texttt{scan} in this case) by the following command:
+		
 		\begin{lstlisting}
 		$ rostopic info /scan
-		\end{lstlisting}{}
-		\item The message type should be :
-		\begin{lstlisting}
-		sensor_msg::LaserScan
-		\end{lstlisting}{}
-		You can also check the information of the message by using the following commands: \\
+		\end{lstlisting}
+		
+		\item The message type of LIDAR scans is usually:
+		
+		\texttt{sensor\_msgs::LaserScan} in C++ and \texttt{sensor\_msgs.LaserScan} in Python.
+		
+		You can also check the detail information on the message type (e.g. what are the fields in the message structure and what are their primitive types) by using the following commands:
+		
 		\begin{lstlisting}
 		$ rosmsg show sensor_msgs/LaserScan
-		\end{lstlisting}{}
-		Go through the \href{http://docs.ros.org/melodic/api/sensor_msgs/html/msg/LaserScan.html}{data type documentation} and see how you can work acquire the data( hint: you should be using \texttt{std::arrays} and/or \texttt{std::vectors} here and be taking care of inf values using \texttt{std::isinf} and \texttt{NaN} values using \texttt{std::isnan})\\
+		\end{lstlisting}
+		
+		Go through the \href{http://docs.ros.org/melodic/api/sensor_msgs/html/msg/LaserScan.html}{message type documentation of LaserScan} to figure out what fields you'll need and what primitive types they are so that you can extract the data you're looking for.
+		
+		You can go through \href{https://wiki.ros.org/msg}{ROS's documentation} on what ROS primitive data types correspond to the languages' primitive and data type.
+		
+		\textbf{Note:} when working with LaserScan messages, \textbf{always} filter out NaNs and infs in the data. You can use \texttt{std::isinf} and \texttt{std::isnan} in C++ and \texttt{np.isinf} and \texttt{np.isnan} in Python(with NumPy).
 		
 		\textbf{Suggestion}: If you are not familiar with using gdb ( c++ debugger) or pdb(python debugger) you can print out messages using:
 		\begin{lstlisting}
 		ROS_INFO_STREAM()
-		\end{lstlisting}{}
+		\end{lstlisting}
 		
 		\item Be sure to include the header file of the message file in your script. (more on what this header file is in a later section of this lab) 
 	\end{itemize}{}

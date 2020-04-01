@@ -170,7 +170,7 @@ public:
         // Create collision file to be written to
         std::string filename;
         n.getParam("collision_file", filename);
-        collision_file.open(ros::package::getPath("racecar_simulator") + "/logs/" + filename + ".txt");
+        collision_file.open(ros::package::getPath("f110_simulator") + "/logs/" + filename + ".txt");
         beginning_seconds = ros::Time::now().toSec();
 
     }
