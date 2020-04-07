@@ -108,11 +108,11 @@
 	Follow the instructions in Section `Localization with Particle Filter' of the Reference Manual and the instructions from the lecture to run particle filter on your car.
 	
 	
-	\noindent You have been supplied with a \texttt{waypoint\_logger} node (pull the github repo), which logs information from the particle filter in Comma Separated Value (CSV) format (one column per piece of information, one row per estimate = one row per time step). You can modify the logger node so that it saves whatever you need. Drive the car manually and not terribly fast around Levine donut while running the particle filter and \texttt{waypoint\_logger}. You will use the generated CSV file as the path to be tracked by pure pursuit.
+	\noindent You have been supplied with a \texttt{waypoint\_logger} node (pull the \href{https://github.com/f1tenth/f1tenth_labs/tree/master/waypoint_logger}{github repo}), which logs information from the particle filter in Comma Separated Value (CSV) format (one column per piece of information, one row per estimate = one row per time step). You can modify the logger node so that it saves whatever you need. Drive the car manually and not terribly fast around Levine donut while running the particle filter and \texttt{waypoint\_logger}. You will use the generated CSV file as the path to be tracked by pure pursuit.
 	
 	
 	\section{Pure Pursuit Implementation}
-	We have provided a skeleton for the pure pursuit node (pull the github repo). As per usual, test your algorithm first in the simulator before you test it on the car. As shown in the lecture, the curvature of the arc to track can be calculated as:
+	We have provided a skeleton for the pure pursuit node (pull the github repo \url{https://github.com/f1tenth/f1tenth_labs/tree/master/lab6}). As per usual, test your algorithm first in the simulator before you test it on the car. As shown in the lecture, the curvature of the arc to track can be calculated as:
 	\begin{equation}
 	\gamma = \frac{2|y|}{L^2}
 	\end{equation}
