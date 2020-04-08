@@ -1,0 +1,215 @@
+\documentclass[letta4 paper]{article}
+% Set target color model to RGB
+\usepackage[inner=2.0cm,outer=2.0cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage[rgb]{xcolor}
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{amsgen,amsmath,amstext,amsbsy,amsopn,tikz,amssymb,tkz-linknodes}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true, urlcolor=blue,  linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\lstset{
+%	language=bash,
+	basicstyle=\ttfamily
+}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+\graphicspath{ {./img/} }
+
+\newcommand{\homework}[6]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf F1TENTH Autonomous Racing \hfill {\small (#2)}} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\Large \hfill #1  \hfill} }
+       \vspace{6mm}
+       \hbox to 6.28in { {\it Instructor: {\rm #3} \hfill Name: {\rm #5}, StudentID: {\rm #6}} }
+       %\hbox to 6.28in { {\it T\textbf{A:} #4  \hfill #6}}
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{#5 -- #1}{#5 -- #1}
+   \vspace*{4mm}
+}
+
+
+\newcommand{\problem}[3]{~\\\fbox{\textbf{Problem #1: #2}}\hfill (#3 points)\newline}
+\newcommand{\subproblem}[1]{~\newline\textbf{(#1)}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Hy}{\mathcal{H}}
+\newcommand{\VS}{\textrm{VS}}
+\newcommand{\solution}{~\newline\textbf{\textit{(Solution)}} }
+
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\usepackage{booktabs}
+
+
+
+\begin{document}
+
+	\homework {Final Project}{Due Date:}{INSTRUCTOR}{}{STUDENT NAME}{ID}
+	\thispagestyle{empty}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	\begin{table}[h]
+		\begin{tabular}{l p{14cm}}
+		\raisebox{-2cm}{\includegraphics[scale=0.5, height=2.5cm]{f1_stickers_02} } & \textit{This lab and all related course material on \href{http://f1tenth.org/}{F1TENTH Autonomous Racing} has been developed by the Safe Autonomous Systems Lab at the University of Pennsylvania (Dr. Rahul Mangharam). It is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.} You may download, use, and modify the material, but must give attribution appropriately. Best practices can be found \href{https://wiki.creativecommons.org/wiki/best_practices_for_attribution}{here}.}
+		\end{tabular}
+	\end{table}
+	% -------- DO NOT REMOVE THIS LICENSE PARAGRAPH	----------------%
+	
+	\noindent \large{\textbf{Course Policy:}} Read all the instructions below carefully before you start working on the assignment, and before you make a submission. All sources of material must be cited. The University Academic Code of Conduct will be strictly enforced.
+	
+	\section{Overview}
+	The objective of your final project submission is to win in two car head-to-head racing. There are multiple weekly milestones to guide you through this process. We have also provided an evaluation environment to test your solutions.
+
+	\section{Project Milestones}
+	
+	\subsection{Week 1}
+	
+	\textbf{Tasks: } \begin{enumerate}
+		\item Install multi-vehicle racing simulator and run tests.
+		\item Work on project proposal and decide approach to solving upcoming tasks.
+	\end{enumerate}
+
+	\noindent\textbf{Evaluation: } \begin{enumerate}
+		\item Completion
+		\item Proposal feedback
+	\end{enumerate}
+
+	\subsection{Week 2}
+	
+	\textbf{Tasks: } \begin{enumerate}
+		\item Single car run with no obstacles.
+	\end{enumerate}
+	
+	\noindent\textbf{Evaluation: } \begin{enumerate}
+		\item Leaderboard will be maintained, scored like other timed races
+	\end{enumerate}
+	
+	\subsection{Week 3}
+	
+	\textbf{Tasks: } \begin{enumerate}
+		\item Demonstrate single-car run with static obstacles
+		\item Demonstrate two-car run with instructor provided agents as the opponent
+	\end{enumerate}
+	
+	\noindent\textbf{Evaluation: } \begin{enumerate}
+		\item Collision frequency
+		\item Present project proposal to instructors
+	\end{enumerate}
+
+	
+	\subsection{Week 4}
+	
+	\textbf{Tasks: } \begin{enumerate}
+		\item Two-car racing benchmark with instructor provided agents
+	\end{enumerate}
+	
+	\noindent\textbf{Evaluation: } \begin{enumerate}
+		\item Collision frequency
+		\item Win rate
+		\item Agent ELO
+	\end{enumerate}
+	
+	\section{The Final Race}
+	Two vehicles will race in the multi-agent simulator on the Skirkanich Track. There will be two round of evaluations. \textbf{Evaluation I: }Performance of your agent will be evaluated against a collection of 10 agents of increasing quality supplied by instructors. You will be given access to a similar (but different) set of such solutions to practice on. \textbf{Evaluation II: }Round-robin tournament of all teams seeded by results of Evaluation I.
+	
+	\section{Environment Installation}
+	All instructions can also be found in the README \href{https://github.com/f1tenth/f1tenth_gym_ros}{here}.
+	\subsection{Installing Docker}
+	Before cloning the environment repository, you'll need to install Docker. You'll also need ROS on your host system. You can follow the instructions \href{https://docs.docker.com/install/linux/docker-ce/ubuntu/}{here} to install Docker, and you can find a short tutorial \href{https://docs.docker.com/get-started/}{here} if you're not familiar with Docker.
+	
+	\subsection{Cloning the Repository and building the Docker image}
+	After you've installed Docker, you'll need to clone the repository \href{https://github.com/f1tenth/f1tenth_gym_ros}{here} into the \textbf{src directory of your catkin workspace}. You can then build the docker image by:
+	\begin{lstlisting}[language=bash]
+		$ cd f1tenth_gym_ros
+		$ sudo ./build_docker.sh
+	\end{lstlisting}
+	Sudo may or may not be needed depending on how you've set up your Docker installation. This will take around 5 minutes to build depending on your system.
+	
+	\subsection{Run the containerized environment}
+	After the Docker image is built, you can run the containerized environment by running:
+	\begin{lstlisting}[language=bash]
+	$ sudo ./docker.sh
+	\end{lstlisting}
+	Again, sudo may or may not be needed here depending on how you set up your Docker installation. You can check everything is working by running this in a new terminal in the host system:
+	\begin{lstlisting}[language=bash]
+	$ rostopic list
+	\end{lstlisting}
+	You should see a few topics like the usual \texttt{/rosout}, and topics provided by the environment like \texttt{/scan} etc.
+	
+	\subsection{Developing and running the environment}
+	To run an example agent, run \texttt{catkin\_make} in your workspace that contains the environment and source the corresponding \texttt{setup.bash} file. And then run:
+	\begin{lstlisting}[language=bash]
+	$ roslaunch f1tenth_gym_ros agent_template.launch
+	\end{lstlisting}
+	To see an example launch file, you can checkout \texttt{launch/agent\_template.launch}. This launch file will bring up the bridge node, and a pre-configured RViz window. By launching this, you should see the blue car (ego) staying at the starting point, and the orange car (opponent) going around the track.
+	
+	If you want to create your own launch file, please include the following lines in your custom launch file to bring up the bridge node and the pre-configured RViz window: \texttt{<include file="\$(find f1tenth\_gym\_ros)/launch/gym\_bridge\_host.launch"/>}
+
+	\subsection{Available Topics}
+	\begin{enumerate}
+		\item \texttt{/scan}: The ego agent's laser scan
+		\item \texttt{/odom}: The ego agent's odometry
+		\item \texttt{/opp\_odom}: The opponent agent's odometry
+		\item \texttt{/map}: The map of the environment
+		\item \texttt{/race\_info}: The information of the environment including both agents' elapsed runtimes, both agents' lap count, and both agents' collision info.
+	\end{enumerate}
+
+	\section{Project Evaluation Criteria}
+	\subsection{Topics}
+	\textbf{Empirical Milestones:} Milestones 1-4 and final race performance, evaluated on weighted sum of quantitative score.
+	
+	\noindent\textbf{Written Report:} Project proposal and written report, evaluated on instructor rubrics, formatting, and quality of writing.
+	
+	\noindent\textbf{Documentation and code:} Maintain and document a GitHub repository, evaluated on validity of documentation, existence of unit tests etc.
+	
+	\noindent\textbf{Presentation:} Proposal presentation and final presentation, evaluated on completion, instructor rubric, and submission of deliverable and assets.
+	
+	\noindent\textbf{Novelty (Bonus Points):} Holistic assessment of the project submission, evaluated on claims of solution and exploration of related work.
+	\subsection{Rubrics}
+	\begin{table}[h]
+		\begin{tabular}{ll}
+			\textbf{Topics} & \textbf{Points} \\
+			Empirical Milestones &	30 \\
+			Written Report &	30 \\
+			Documentation/Code &	20 \\
+			Presentation &	20 \\
+			Novelty (Bonus) &	5 \\
+			\textbf{Total} & 100(+5) \\
+		\end{tabular}
+	\end{table}
+	
+
+	
+			
+\end{document} 
