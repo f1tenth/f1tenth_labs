@@ -511,7 +511,7 @@ public:
                 // brake
                 accel = -max_decel; 
             }    
-        } else {
+        } else if (state.velocity < 0) {
             if (dif > 0) {
                 // brake
                 accel = max_decel;
@@ -521,7 +521,11 @@ public:
                 double kp = 2.0 * max_accel / max_speed;
                 set_accel(kp * dif);
             }   
-        }
+        } else {
+	    // zero speed, accel either way
+	    double kp = 2.0 * max_accel / max_speed;
+	    set_accel(kp * dif);
+	}
     }
 
         /// ---------------------- CALLBACK FUNCTIONS ----------------------
