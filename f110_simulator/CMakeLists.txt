@@ -11,7 +11,7 @@ endif()
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g") 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-find_package(OpenCV)
+
 find_package(Eigen3)
 
 ######################################
@@ -43,6 +43,7 @@ install(DIRECTORY include/${PROJECT_NAME}
 # Only run this code in the catkin environment
 if(DEFINED CATKIN_DEVEL_PREFIX)
   find_package(catkin REQUIRED COMPONENTS
+    roslib
     roscpp
     tf2
     tf2_ros
@@ -54,8 +55,7 @@ if(DEFINED CATKIN_DEVEL_PREFIX)
 
     interactive_markers
     visualization_msgs
-    cv_bridge
-    image_transport
+
     std_msgs
     message_generation
     )
